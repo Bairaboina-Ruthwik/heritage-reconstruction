@@ -77,20 +77,26 @@ def evaluate_model(model, test_dir, scale=4, device='cuda'):
 #     evaluate_model(model, rf'C:\Users\RUTHWIK\OneDrive\Desktop\sr_benchmarks', scale=4)
 
 
-# Load model and evaluate
+# Load model and evaluate  
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model = MAETNet(num_feat=64, scale=4).to(device)
 
-# ✅ FIX 1: Add 'r' before the string so Windows paths don't crash
-ckpt = torch.load(r'D:\sr_iter_5000.pth', map_location=device)
+
+ckpt = torch.load('/content/drive/MyDrive/heritage_reconstruction_copy/checkpoints/sr_model/sr_latest.pth', map_location=device)
 model.load_state_dict(ckpt['model'])
 
 for dataset in ['Set5', 'Set14', 'manga109', 'Urban100']:
-    # ✅ FIX 2: Use an f-string WITH a raw string (rf) to append the dataset name
-    dataset_path = rf'C:\Users\RUTHWIK\OneDrive\Desktop\sr_benchmarks\{dataset}\HR'
+    dataset_path = f'/content/drive/MyDrive/heritage_reconstruction_copy/sr_benchmarks/{dataset}/HR'
     
     # Optional safety check to prevent crashing if a folder is missing
     if os.path.exists(dataset_path):
-        evaluate_model(model, dataset_path, scale=4, device=device)
+        #evaluate_model(model, dataset_path, scale=4, device=device)
+        # We catch the PSNR and SSIM returns here
+        avg_psnr, avg_ssim = evaluate_model(model, dataset_path, scale=4, device=device)
+        
+        #  FIX: Print the actual dataset name here instead of inside the function
+        print(f" Final Results on {dataset}: PSNR={avg_psnr:.2f} dB | SSIM={avg_ssim:.4f}")
     else:
         print(f"Directory not found: {dataset_path}")
+
+        
